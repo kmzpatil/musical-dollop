@@ -1,0 +1,31 @@
+{
+  "name": "Brand AI-Readiness Audit",
+  "version": "1.0.0",
+  "description": "An agentic marketplace of skills to audit a website for AI discoverability and engagement readiness.",
+  "skills": [
+    {
+      "id": "audit-orchestrator",
+      "name": "Audit Orchestrator",
+      "path": "skills/audit-orchestrator",
+      "description": "The entrypoint skill that coordinates the AI readiness audit and generates a prioritized report."
+    },
+    {
+      "id": "discoverability-audit",
+      "name": "Discoverability Audit",
+      "path": "skills/discoverability-audit",
+      "description": "Analyzes the DOM for AI crawlability blockers (robots.txt, missing semantic HTML, JSON-LD, etc)."
+    },
+    {
+      "id": "engagement-audit",
+      "name": "Engagement Audit",
+      "path": "skills/engagement-audit",
+      "description": "Analyzes the site layout for semantic orientation (nav, headers, main) and internal linking."
+    },
+    {
+      "id": "ai-answerability-audit",
+      "name": "AI Answerability Audit",
+      "path": "skills/ai-answerability-audit",
+      "description": "An agentic self-test that verifies if an LLM can accurately extract facts about the brand via live search grounding."
+    }
+  ]
+}

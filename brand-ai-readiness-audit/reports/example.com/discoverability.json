@@ -1,0 +1,39 @@
+[
+  {
+    "id": "D-008",
+    "title": "Missing llms.txt",
+    "severity": "medium",
+    "evidence": "No llms.txt found at the domain root.",
+    "impact": 4,
+    "effort": 1,
+    "suggested_action": {
+      "summary": "Adopt the llms.txt standard by hosting an llms.txt file to provide structured context explicitly for AI crawlers. Machines extract facts more reliably from explicit, concise markdown than from complex HTML layouts.",
+      "priority": "high"
+    }
+  },
+  {
+    "id": "D-002",
+    "title": "Missing JSON-LD Structured Data",
+    "severity": "high",
+    "evidence": "No <script type='application/ld+json'> found in the initial HTML payload.",
+    "impact": 4,
+    "effort": 3,
+    "suggested_action": {
+      "summary": "Add Schema.org JSON-LD to describe the organization, products, or articles clearly. AI assistants rely on structured data to confidently extract semantic entities without guessing.",
+      "priority": "high",
+      "snippet": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"Organization\",\n  \"name\": \"Example Domain\",\n  \"url\": \"https://example.com\",\n  \"sameAs\": [\n    \"https://en.wikipedia.org/wiki/Your_Brand\"\n  ]\n}\n</script>"
+    }
+  },
+  {
+    "id": "D-007",
+    "title": "Missing Canonical Tag",
+    "severity": "medium",
+    "evidence": "No <link rel='canonical'> tag found.",
+    "impact": 3,
+    "effort": 1,
+    "suggested_action": {
+      "summary": "Add a canonical tag to prevent AI indexes from splitting your domain's entity authority across duplicate URLs. Explicit signals guide the model's weight attribution to the correct primary source.",
+      "priority": "medium"
+    }
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "E-004",
+    "title": "Excessive DOM Depth",
+    "severity": "medium",
+    "evidence": "Maximum DOM depth is 206. Excessive nesting harms performance and complicates LLM parsing.",
+    "impact": 3,
+    "effort": 2,
+    "suggested_action": {
+      "summary": "Flatten the HTML structure to improve rendering performance and simplify context extraction for AI crawlers. Deep DOMs exhaust crawler time-budgets and dilute semantic signals.",
+      "priority": "medium"
+    }
+  }
+]

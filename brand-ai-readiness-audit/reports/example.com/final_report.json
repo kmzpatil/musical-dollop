@@ -1,0 +1,92 @@
+{
+  "site": "example.com",
+  "audited_at": "2026-09-02T21:34:18Z",
+  "summary": {
+    "total_findings": 6,
+    "critical": 1,
+    "high": 4,
+    "medium": 1,
+    "low": 0
+  },
+  "findings": [
+    {
+      "id": "D-008",
+      "title": "Missing llms.txt",
+      "severity": "critical",
+      "evidence": "No llms.txt found at the domain root.",
+      "impact": 4,
+      "effort": 1,
+      "suggested_action": {
+        "summary": "Adopt the llms.txt standard by hosting an llms.txt file to provide structured context explicitly for AI crawlers. Machines extract facts more reliably from explicit, concise markdown than from complex HTML layouts.",
+        "priority": "high"
+      },
+      "priority_score": 4.3
+    },
+    {
+      "id": "D-002",
+      "title": "Missing JSON-LD Structured Data",
+      "severity": "high",
+      "evidence": "No <script type='application/ld+json'> found in the initial HTML payload.",
+      "impact": 4,
+      "effort": 3,
+      "suggested_action": {
+        "summary": "Add Schema.org JSON-LD to describe the organization, products, or articles clearly. AI assistants rely on structured data to confidently extract semantic entities without guessing.",
+        "priority": "high",
+        "snippet": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"Organization\",\n  \"name\": \"Example Domain\",\n  \"url\": \"https://example.com\",\n  \"sameAs\": [\n    \"https://en.wikipedia.org/wiki/Your_Brand\"\n  ]\n}\n</script>"
+      },
+      "priority_score": 3.7
+    },
+    {
+      "id": "D-007",
+      "title": "Missing Canonical Tag",
+      "severity": "high",
+      "evidence": "No <link rel='canonical'> tag found.",
+      "impact": 3,
+      "effort": 1,
+      "suggested_action": {
+        "summary": "Add a canonical tag to prevent AI indexes from splitting your domain's entity authority across duplicate URLs. Explicit signals guide the model's weight attribution to the correct primary source.",
+        "priority": "medium"
+      },
+      "priority_score": 3.6
+    },
+    {
+      "id": "E-001",
+      "title": "Weak Above-the-Fold Visibility",
+      "severity": "medium",
+      "evidence": "No <nav> or <header> tags found in the HTML structure to orient the user.",
+      "impact": 3,
+      "effort": 4,
+      "suggested_action": {
+        "summary": "Implement semantic <nav> and <header> elements to provide clear context and navigation for incoming visitors. LLMs use these landmarks to quickly parse site taxonomy and establish context.",
+        "priority": "medium"
+      },
+      "priority_score": 2.7
+    },
+    {
+      "id": "E-002",
+      "title": "Navigation Path Depth & Dead Ends",
+      "severity": "high",
+      "evidence": "Found only 1 links and 0 buttons. This suggests a dead end.",
+      "impact": 4,
+      "effort": 3,
+      "suggested_action": {
+        "summary": "Add clear Call-to-Action (CTA) buttons or internal links to engage visitors and reduce click distance to key info. Dead ends severely impact user retention metrics, which AI agents increasingly track to score authority.",
+        "priority": "high"
+      },
+      "priority_score": 3.7
+    },
+    {
+      "id": "E-005",
+      "title": "Missing Semantic Content Area",
+      "severity": "high",
+      "evidence": "No <main> or <article> tags found. AI crawlers struggle to distinguish primary content from sidebar noise.",
+      "impact": 4,
+      "effort": 2,
+      "suggested_action": {
+        "summary": "Wrap the primary page content in a <main> or <article> tag. Machines extract facts more reliably when explicit plain text is separated from navigational or advertorial layout elements.",
+        "priority": "high"
+      },
+      "priority_score": 4.0
+    }
+  ]
+}

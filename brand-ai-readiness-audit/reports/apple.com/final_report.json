@@ -1,0 +1,66 @@
+{
+  "site": "apple.com",
+  "audited_at": "2026-09-02T21:39:15Z",
+  "summary": {
+    "total_findings": 4,
+    "critical": 1,
+    "high": 1,
+    "medium": 2,
+    "low": 0
+  },
+  "findings": [
+    {
+      "id": "D-008",
+      "title": "Missing llms.txt",
+      "severity": "high",
+      "evidence": "No llms.txt found at the domain root.",
+      "impact": 4,
+      "effort": 1,
+      "suggested_action": {
+        "summary": "Adopt the llms.txt standard by hosting an llms.txt file to provide structured context explicitly for AI crawlers. Machines extract facts more reliably from explicit, concise markdown than from complex HTML layouts.",
+        "priority": "high"
+      },
+      "priority_score": 4.3
+    },
+    {
+      "id": "D-005",
+      "title": "Images Missing Alt Text",
+      "severity": "medium",
+      "evidence": "Found 80 images without alt text. LLMs are blind to these images.",
+      "impact": 3,
+      "effort": 2,
+      "suggested_action": {
+        "summary": "Ensure all critical images have descriptive alt text for accessibility and AI parsing. Vision models use surrounding text and alt tags to contextualize non-textual content.",
+        "priority": "medium"
+      },
+      "priority_score": 3.3
+    },
+    {
+      "id": "E-004",
+      "title": "Excessive DOM Depth",
+      "severity": "medium",
+      "evidence": "Maximum DOM depth is 206. Excessive nesting harms performance and complicates LLM parsing.",
+      "impact": 3,
+      "effort": 2,
+      "suggested_action": {
+        "summary": "Flatten the HTML structure to improve rendering performance and simplify context extraction for AI crawlers. Deep DOMs exhaust crawler time-budgets and dilute semantic signals.",
+        "priority": "medium"
+      },
+      "priority_score": 3.3
+    },
+    {
+      "id": "A-001",
+      "title": "Uncorroborated / Stale Factual Claims (HQ Location)",
+      "severity": "critical",
+      "confidence": "high",
+      "evidence": "Ground truth on HQ location is 'Cupertino, CA' but live search grounding returned outdated data about a previous campus. AI models are surfacing stale data.",
+      "impact": 5,
+      "effort": 2,
+      "suggested_action": {
+        "summary": "Update pages with 'dateModified' Schema.org tags and push updates to primary knowledge bases (Wikidata, Crunchbase) to ensure independent corroboration.",
+        "priority": "critical"
+      },
+      "priority_score": 4.7
+    }
+  ]
+}

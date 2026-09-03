@@ -1,0 +1,38 @@
+[
+  {
+    "id": "E-001",
+    "title": "Weak Above-the-Fold Visibility",
+    "severity": "medium",
+    "evidence": "No <nav> or <header> tags found in the HTML structure to orient the user.",
+    "impact": 3,
+    "effort": 4,
+    "suggested_action": {
+      "summary": "Implement semantic <nav> and <header> elements to provide clear context and navigation for incoming visitors. LLMs use these landmarks to quickly parse site taxonomy and establish context.",
+      "priority": "medium"
+    }
+  },
+  {
+    "id": "E-002",
+    "title": "Navigation Path Depth & Dead Ends",
+    "severity": "high",
+    "evidence": "Found only 1 links and 0 buttons. This suggests a dead end.",
+    "impact": 4,
+    "effort": 3,
+    "suggested_action": {
+      "summary": "Add clear Call-to-Action (CTA) buttons or internal links to engage visitors and reduce click distance to key info. Dead ends severely impact user retention metrics, which AI agents increasingly track to score authority.",
+      "priority": "high"
+    }
+  },
+  {
+    "id": "E-005",
+    "title": "Missing Semantic Content Area",
+    "severity": "high",
+    "evidence": "No <main> or <article> tags found. AI crawlers struggle to distinguish primary content from sidebar noise.",
+    "impact": 4,
+    "effort": 2,
+    "suggested_action": {
+      "summary": "Wrap the primary page content in a <main> or <article> tag. Machines extract facts more reliably when explicit plain text is separated from navigational or advertorial layout elements.",
+      "priority": "high"
+    }
+  }
+]

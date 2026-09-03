@@ -1,0 +1,15 @@
+[
+  {
+    "id": "A-001",
+    "title": "Uncorroborated / Stale Factual Claims (HQ Location)",
+    "severity": "high",
+    "confidence": "high",
+    "evidence": "Ground truth on HQ location is 'Cupertino, CA' but live search grounding returned outdated data about a previous campus. AI models are surfacing stale data.",
+    "impact": 5,
+    "effort": 2,
+    "suggested_action": {
+      "summary": "Update pages with 'dateModified' Schema.org tags and push updates to primary knowledge bases (Wikidata, Crunchbase) to ensure independent corroboration.",
+      "priority": "high"
+    }
+  }
+]

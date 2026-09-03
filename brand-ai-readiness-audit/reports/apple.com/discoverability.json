@@ -1,0 +1,26 @@
+[
+  {
+    "id": "D-008",
+    "title": "Missing llms.txt",
+    "severity": "medium",
+    "evidence": "No llms.txt found at the domain root.",
+    "impact": 4,
+    "effort": 1,
+    "suggested_action": {
+      "summary": "Adopt the llms.txt standard by hosting an llms.txt file to provide structured context explicitly for AI crawlers. Machines extract facts more reliably from explicit, concise markdown than from complex HTML layouts.",
+      "priority": "high"
+    }
+  },
+  {
+    "id": "D-005",
+    "title": "Images Missing Alt Text",
+    "severity": "medium",
+    "evidence": "Found 80 images without alt text. LLMs are blind to these images.",
+    "impact": 3,
+    "effort": 2,
+    "suggested_action": {
+      "summary": "Ensure all critical images have descriptive alt text for accessibility and AI parsing. Vision models use surrounding text and alt tags to contextualize non-textual content.",
+      "priority": "medium"
+    }
+  }
+]
