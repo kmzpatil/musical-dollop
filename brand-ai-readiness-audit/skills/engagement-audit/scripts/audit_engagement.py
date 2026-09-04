@@ -4,12 +4,19 @@ import json
 
 # Add the marketplace root to sys.path to import the shared parser
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
-from skills.shared.parser import parse_url
+from skills.shared.parser import parse_url, parse_html
+from urllib.parse import urlparse
 
-def audit(url):
+def audit(url, source_file=None):
     findings = []
     
-    result = parse_url(url)
+    if source_file and os.path.exists(source_file):
+        with open(source_file, 'r') as f:
+            html = f.read()
+        result = parse_html(html)
+    else:
+        result = parse_url(url)
+        
     if not result["success"]:
         return findings
 
@@ -31,13 +38,21 @@ def audit(url):
         })
 
     # 2. Internal Linking & Depth
-    num_links = len(parser.links)
-    if num_links < 3 and parser.buttons == 0:
+    parsed_base = urlparse(url)
+    base_domain = parsed_base.netloc
+    
+    internal_links = 0
+    for link in parser.links:
+        parsed_link = urlparse(link)
+        if not parsed_link.netloc or parsed_link.netloc == base_domain:
+            internal_links += 1
+
+    if internal_links < 3 and parser.buttons == 0:
         findings.append({
             "id": "E-002",
             "title": "Navigation Path Depth & Dead Ends",
             "severity": "high",
-            "evidence": f"Found only {num_links} links and {parser.buttons} buttons. This suggests a dead end.",
+            "evidence": f"Found only {internal_links} internal links and {parser.buttons} buttons. This suggests a dead end.",
             "impact": 4,
             "effort": 3,
             "suggested_action": {
@@ -106,6 +121,21 @@ def audit(url):
             }
         })
 
+    # 7. Intrusive Overlay Detection
+    if getattr(parser, 'has_overlay', False):
+        findings.append({
+            "id": "E-007",
+            "title": "Intrusive Overlay Detected",
+            "severity": "high",
+            "evidence": "Detected modal, popup, cookie-banner, or blocking interstitial in the DOM.",
+            "impact": 5,
+            "effort": 2,
+            "suggested_action": {
+                "summary": "AI-referred visitors may bounce due to immediate viewport obstruction. Use non-blocking banners instead of centered overlays or modals that require immediate interaction.",
+                "priority": "high"
+            }
+        })
+
     return findings
 
 if __name__ == "__main__":
@@ -117,5 +147,7 @@ if __name__ == "__main__":
     if not url.startswith("http"):
         url = "https://" + url
         
-    results = audit(url)
+    source_file = sys.argv[2] if len(sys.argv) > 2 else None
+        
+    results = audit(url, source_file)
     print(json.dumps(results, indent=2))

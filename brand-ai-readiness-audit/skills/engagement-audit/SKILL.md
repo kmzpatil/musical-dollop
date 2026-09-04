@@ -1,5 +1,5 @@
 ---
-name: Engagement Audit
+name: engagement-audit
 description: Analyzes the site layout for semantic orientation (nav, headers, main) and internal linking.
 ---
 

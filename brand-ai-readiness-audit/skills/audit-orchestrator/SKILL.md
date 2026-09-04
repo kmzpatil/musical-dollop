@@ -1,5 +1,5 @@
 ---
-name: Audit Orchestrator
+name: audit-orchestrator
 description: Coordinates the AI readiness audit and generates a prioritized report.
 ---
 

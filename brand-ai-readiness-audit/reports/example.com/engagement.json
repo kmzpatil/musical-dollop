@@ -15,7 +15,7 @@
     "id": "E-002",
     "title": "Navigation Path Depth & Dead Ends",
     "severity": "high",
-    "evidence": "Found only 1 links and 0 buttons. This suggests a dead end.",
+    "evidence": "Found only 0 internal links and 0 buttons. This suggests a dead end.",
     "impact": 4,
     "effort": 3,
     "suggested_action": {

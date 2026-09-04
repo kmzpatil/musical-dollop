@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+venv/
+.env
+
+reports/
+report.json
+mock_discoverability_report.json
+mock_engagement_report.json
+audit_report.md
+mock_external.html
+mock_overlay.html
+test_robots.py
