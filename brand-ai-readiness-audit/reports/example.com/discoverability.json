@@ -1,5 +1,17 @@
 [
   {
+    "id": "D-001",
+    "title": "AI Crawlers Blocked in Robots.txt",
+    "severity": "critical",
+    "evidence": "Robots.txt fetch failed (Timeout or HTTP Error): HTTP Error 404: Not Found",
+    "impact": 5,
+    "effort": 1,
+    "suggested_action": {
+      "summary": "Update robots.txt to allow specific AI bots like GPTBot, ClaudeBot, and PerplexityBot to read your public content. Generative AI engines require explicit permission to ingest your brand's facts into their training weights or real-time indexes.",
+      "priority": "critical"
+    }
+  },
+  {
     "id": "D-008",
     "title": "Missing llms.txt",
     "severity": "medium",
@@ -33,6 +45,18 @@
     "effort": 1,
     "suggested_action": {
       "summary": "Add a canonical tag to prevent AI indexes from splitting your domain's entity authority across duplicate URLs. Explicit signals guide the model's weight attribution to the correct primary source.",
+      "priority": "medium"
+    }
+  },
+  {
+    "id": "D-013",
+    "title": "Missing OpenGraph Metadata",
+    "severity": "medium",
+    "evidence": "No OpenGraph (og:) or Twitter card metadata found.",
+    "impact": 3,
+    "effort": 1,
+    "suggested_action": {
+      "summary": "Add OpenGraph tags to ensure rich-link visibility when AI engines generate citations or share links.",
       "priority": "medium"
     }
   }

@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 # Add the marketplace root to sys.path to import the shared parser
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
-from skills.shared.parser import parse_url
+from skills.shared.parser import parse_url, parse_html
 
 def check_robots(url):
     parsed = urlparse(url)
@@ -23,14 +23,14 @@ def check_robots(url):
                 if line.startswith('user-agent:'):
                     current_agent = line.split(':')[1].strip()
                 elif line.startswith('disallow:') and '/' in line:
-                    if current_agent in ['gptbot', 'claudebot', 'perplexitybot', 'oai-searchbot', 'ccbot', 'google-extended']:
+                    if current_agent in ['gptbot', 'claudebot', 'perplexitybot', 'oai-searchbot', 'ccbot', 'google-extended'] or (current_agent == '*' and line == 'disallow: /'):
                         blocked_bots.append(current_agent)
                         
             if blocked_bots:
                 return False, f"Robots.txt is explicitly blocking AI crawlers: {', '.join(set(blocked_bots))}."
             return True, "Robots.txt is present and does not block known AI crawlers."
-    except Exception:
-        return True, "No restrictive robots.txt found."
+    except Exception as e:
+        return False, f"Robots.txt fetch failed (Timeout or HTTP Error): {str(e)}"
 
 def check_llms_txt(url):
     parsed = urlparse(url)
@@ -44,7 +44,7 @@ def check_llms_txt(url):
         pass
     return False
 
-def audit(url):
+def audit(url, source_file=None):
     findings = []
     
     # 1. Robots check for AI Crawlers
@@ -80,7 +80,12 @@ def audit(url):
         })
 
     # Fetch and parse using the unified Ingestion Engine
-    result = parse_url(url)
+    if source_file and os.path.exists(source_file):
+        with open(source_file, 'r') as f:
+            html = f.read()
+        result = parse_html(html)
+    else:
+        result = parse_url(url)
     if not result["success"]:
         findings.append({
             "id": "D-000",
@@ -210,6 +215,61 @@ def audit(url):
             }
         })
 
+    # 7. OpenGraph check
+    if parser.og_tags == 0:
+        findings.append({
+            "id": "D-013",
+            "title": "Missing OpenGraph Metadata",
+            "severity": "medium",
+            "evidence": "No OpenGraph (og:) or Twitter card metadata found.",
+            "impact": 3,
+            "effort": 1,
+            "suggested_action": {
+                "summary": "Add OpenGraph tags to ensure rich-link visibility when AI engines generate citations or share links.",
+                "priority": "medium"
+            }
+        })
+
+    # Proactive Recommendations
+    findings.append({
+        "id": "D-014",
+        "title": "Proactive: Add dateModified for Freshness",
+        "severity": "low",
+        "evidence": "Enhance existing JSON-LD schemas.",
+        "impact": 2,
+        "effort": 1,
+        "suggested_action": {
+            "summary": "Recommend adding dateModified and datePublished tags to JSON-LD so AI bots can prioritize fresh content.",
+            "priority": "low"
+        }
+    })
+    
+    findings.append({
+        "id": "D-015",
+        "title": "Proactive: Strengthen Entity Graphs",
+        "severity": "medium",
+        "evidence": "Enhance sameAs links.",
+        "impact": 3,
+        "effort": 1,
+        "suggested_action": {
+            "summary": "Recommend linking Wikidata, Crunchbase, or LinkedIn URLs in the sameAs array to strengthen entity disambiguation.",
+            "priority": "medium"
+        }
+    })
+
+    findings.append({
+        "id": "D-016",
+        "title": "Proactive: Add Rich Features",
+        "severity": "low",
+        "evidence": "Enhance structured data coverage.",
+        "impact": 2,
+        "effort": 2,
+        "suggested_action": {
+            "summary": "Recommend adding FAQPage, HowTo, or BreadcrumbList structured data to feed AI snippet features.",
+            "priority": "low"
+        }
+    })
+
     return findings
 
 if __name__ == "__main__":
@@ -221,5 +281,7 @@ if __name__ == "__main__":
     if not url.startswith("http"):
         url = "https://" + url
         
-    results = audit(url)
+    source_file = sys.argv[2] if len(sys.argv) > 2 else None
+        
+    results = audit(url, source_file)
     print(json.dumps(results, indent=2))

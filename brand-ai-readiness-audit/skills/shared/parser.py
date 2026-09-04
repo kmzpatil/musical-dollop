@@ -41,13 +41,17 @@ class IngestionParser(HTMLParser):
         self.body_text_length = 0
         self.has_root_div = False
         self.has_noscript = False
+        
+        # Overlay Detection
+        self.has_overlay = False
 
     def handle_starttag(self, tag, attrs):
-        self.current_depth += 1
-        if self.current_depth > self.max_dom_depth:
-            self.max_dom_depth = self.current_depth
-            
-        self.tag_stack.append(tag)
+        VOID_ELEMENTS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+        if tag not in VOID_ELEMENTS:
+            self.current_depth += 1
+            if self.current_depth > self.max_dom_depth:
+                self.max_dom_depth = self.current_depth
+            self.tag_stack.append(tag)
         attrs_dict = dict(attrs)
         
         if tag == "script" and attrs_dict.get("type") == "application/ld+json":
@@ -86,6 +90,19 @@ class IngestionParser(HTMLParser):
             self.has_root_div = True
         elif tag == "noscript":
             self.has_noscript = True
+            
+        classes = attrs_dict.get("class", "").lower()
+        id_attr = attrs_dict.get("id", "").lower()
+        role = attrs_dict.get("role", "").lower()
+        overlay_keywords = ["modal", "popup", "overlay", "cookie-banner", "interstitial"]
+        
+        if role == "dialog":
+            self.has_overlay = True
+        else:
+            for kw in overlay_keywords:
+                if kw in classes or kw in id_attr:
+                    self.has_overlay = True
+                    break
                 
         # Record structural element
         if tag in ["h1", "h2", "h3", "h4", "h5", "h6", "p", "ul", "ol", "li", "div", "span"]:
@@ -108,7 +125,15 @@ class IngestionParser(HTMLParser):
             try:
                 data = json.loads(self.json_ld_content)
                 items = data if isinstance(data, list) else [data]
+                
+                unwrapped_items = []
                 for item in items:
+                    if "@graph" in item and isinstance(item["@graph"], list):
+                        unwrapped_items.extend(item["@graph"])
+                    else:
+                        unwrapped_items.append(item)
+                        
+                for item in unwrapped_items:
                     if "sameAs" in item:
                         self.has_same_as = True
                     schema_type = item.get("@type", "")
@@ -136,6 +161,11 @@ class IngestionParser(HTMLParser):
             
         if text and "script" not in self.tag_stack and "style" not in self.tag_stack:
             self.body_text_length += len(text)
+
+def parse_html(html_content):
+    parser = IngestionParser()
+    parser.feed(html_content)
+    return {"success": True, "html_length": len(html_content), "parser": parser}
 
 def parse_url(url, retries=3):
     headers = {

@@ -1,5 +1,5 @@
 ---
-name: Discoverability Audit
+name: discoverability-audit
 description: Analyzes the DOM for AI crawlability blockers (robots.txt, llms.txt, JSON-LD schema completeness).
 ---
 

@@ -1,3 +1,8 @@
+---
+name: ai-answerability-audit
+description: Verifies whether core brand facts can be unambiguously extracted and cited by LLMs.
+---
+
 # AI-Answerability Audit Skill
 
 ## Objective
