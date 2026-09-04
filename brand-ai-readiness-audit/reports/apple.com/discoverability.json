@@ -8,7 +8,8 @@
     "effort": 1,
     "suggested_action": {
       "summary": "Adopt the llms.txt standard by hosting an llms.txt file to provide structured context explicitly for AI crawlers. Machines extract facts more reliably from explicit, concise markdown than from complex HTML layouts.",
-      "priority": "high"
+      "priority": "high",
+      "snippet": "# Brand Context\nThis site is the official home for [Brand Name].\n\n## Key Facts\n- Fact 1\n- Fact 2"
     }
   },
   {
@@ -21,6 +22,42 @@
     "suggested_action": {
       "summary": "Ensure all critical images have descriptive alt text for accessibility and AI parsing. Vision models use surrounding text and alt tags to contextualize non-textual content.",
       "priority": "medium"
+    }
+  },
+  {
+    "id": "D-014",
+    "title": "Proactive: Add dateModified for Freshness",
+    "severity": "low",
+    "evidence": "Enhance existing JSON-LD schemas.",
+    "impact": 2,
+    "effort": 1,
+    "suggested_action": {
+      "summary": "Recommend adding dateModified and datePublished tags to JSON-LD so AI bots can prioritize fresh content.",
+      "priority": "low"
+    }
+  },
+  {
+    "id": "D-015",
+    "title": "Proactive: Strengthen Entity Graphs",
+    "severity": "medium",
+    "evidence": "Enhance sameAs links.",
+    "impact": 3,
+    "effort": 1,
+    "suggested_action": {
+      "summary": "Recommend linking Wikidata, Crunchbase, or LinkedIn URLs in the sameAs array to strengthen entity disambiguation.",
+      "priority": "medium"
+    }
+  },
+  {
+    "id": "D-016",
+    "title": "Proactive: Add Rich Features",
+    "severity": "low",
+    "evidence": "Enhance structured data coverage.",
+    "impact": 2,
+    "effort": 2,
+    "suggested_action": {
+      "summary": "Recommend adding FAQPage, HowTo, or BreadcrumbList structured data to feed AI snippet features.",
+      "priority": "low"
     }
   }
 ]

@@ -11,7 +11,7 @@ def audit(url, source_file=None):
     findings = []
     
     if source_file and os.path.exists(source_file):
-        with open(source_file, 'r') as f:
+        with open(source_file, 'r', encoding='utf-8', errors='ignore') as f:
             html = f.read()
         result = parse_html(html)
     else:
