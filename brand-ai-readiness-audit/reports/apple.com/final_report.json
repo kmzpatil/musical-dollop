@@ -1,12 +1,11 @@
 {
   "site": "apple.com",
-  "audited_at": "2026-09-02T21:39:15Z",
+  "audited_at": "2026-09-04T20:23:30Z",
   "summary": {
-    "total_findings": 4,
-    "critical": 1,
-    "high": 1,
-    "medium": 2,
-    "low": 0
+    "total_findings": 6,
+    "critical": 0,
+    "high": 3,
+    "medium": 3
   },
   "findings": [
     {
@@ -14,53 +13,93 @@
       "title": "Missing llms.txt",
       "severity": "high",
       "evidence": "No llms.txt found at the domain root.",
-      "impact": 4,
-      "effort": 1,
       "suggested_action": {
         "summary": "Adopt the llms.txt standard by hosting an llms.txt file to provide structured context explicitly for AI crawlers. Machines extract facts more reliably from explicit, concise markdown than from complex HTML layouts.",
         "priority": "high"
       },
-      "priority_score": 4.3
+      "metadata": {
+        "impact": 4,
+        "effort": 1,
+        "priority_score": 4.3,
+        "suggested_action_metadata": {
+          "snippet": "# Brand Context\nThis site is the official home for [Brand Name].\n\n## Key Facts\n- Fact 1\n- Fact 2"
+        }
+      }
+    },
+    {
+      "id": "A-001",
+      "title": "Entity Definition Buried or Missing",
+      "severity": "high",
+      "evidence": "The brand entity 'Apple' and definitional verbs do not appear within the first 100 words of the parsed body text.",
+      "suggested_action": {
+        "summary": "Ensure the first paragraph of the page clearly states what the brand is and what it provides. LLMs struggle to extract concise summaries when definitions are buried deep in the DOM or hidden in unstructured layouts.",
+        "priority": "high"
+      },
+      "metadata": {
+        "impact": 4,
+        "effort": 2,
+        "priority_score": 4.0
+      }
+    },
+    {
+      "id": "D-015",
+      "title": "Proactive: Strengthen Entity Graphs",
+      "severity": "high",
+      "evidence": "Enhance sameAs links.",
+      "suggested_action": {
+        "summary": "Recommend linking Wikidata, Crunchbase, or LinkedIn URLs in the sameAs array to strengthen entity disambiguation.",
+        "priority": "high"
+      },
+      "metadata": {
+        "impact": 3,
+        "effort": 1,
+        "priority_score": 3.6
+      }
     },
     {
       "id": "D-005",
       "title": "Images Missing Alt Text",
       "severity": "medium",
       "evidence": "Found 80 images without alt text. LLMs are blind to these images.",
-      "impact": 3,
-      "effort": 2,
       "suggested_action": {
         "summary": "Ensure all critical images have descriptive alt text for accessibility and AI parsing. Vision models use surrounding text and alt tags to contextualize non-textual content.",
         "priority": "medium"
       },
-      "priority_score": 3.3
+      "metadata": {
+        "impact": 3,
+        "effort": 2,
+        "priority_score": 3.3
+      }
     },
     {
-      "id": "E-004",
-      "title": "Excessive DOM Depth",
+      "id": "D-014",
+      "title": "Proactive: Add dateModified for Freshness",
       "severity": "medium",
-      "evidence": "Maximum DOM depth is 206. Excessive nesting harms performance and complicates LLM parsing.",
-      "impact": 3,
-      "effort": 2,
+      "evidence": "Enhance existing JSON-LD schemas.",
       "suggested_action": {
-        "summary": "Flatten the HTML structure to improve rendering performance and simplify context extraction for AI crawlers. Deep DOMs exhaust crawler time-budgets and dilute semantic signals.",
+        "summary": "Recommend adding dateModified and datePublished tags to JSON-LD so AI bots can prioritize fresh content.",
         "priority": "medium"
       },
-      "priority_score": 3.3
+      "metadata": {
+        "impact": 2,
+        "effort": 1,
+        "priority_score": 2.9
+      }
     },
     {
-      "id": "A-001",
-      "title": "Uncorroborated / Stale Factual Claims (HQ Location)",
-      "severity": "critical",
-      "confidence": "high",
-      "evidence": "Ground truth on HQ location is 'Cupertino, CA' but live search grounding returned outdated data about a previous campus. AI models are surfacing stale data.",
-      "impact": 5,
-      "effort": 2,
+      "id": "D-016",
+      "title": "Proactive: Add Rich Features",
+      "severity": "medium",
+      "evidence": "Enhance structured data coverage.",
       "suggested_action": {
-        "summary": "Update pages with 'dateModified' Schema.org tags and push updates to primary knowledge bases (Wikidata, Crunchbase) to ensure independent corroboration.",
-        "priority": "critical"
+        "summary": "Recommend adding FAQPage, HowTo, or BreadcrumbList structured data to feed AI snippet features.",
+        "priority": "medium"
       },
-      "priority_score": 4.7
+      "metadata": {
+        "impact": 2,
+        "effort": 2,
+        "priority_score": 2.6
+      }
     }
   ]
 }

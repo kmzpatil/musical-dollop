@@ -1,14 +1,13 @@
 [
   {
     "id": "A-001",
-    "title": "Uncorroborated / Stale Factual Claims (HQ Location)",
+    "title": "Entity Definition Buried or Missing",
     "severity": "high",
-    "confidence": "high",
-    "evidence": "Ground truth on HQ location is 'Cupertino, CA' but live search grounding returned outdated data about a previous campus. AI models are surfacing stale data.",
-    "impact": 5,
+    "evidence": "The brand entity 'Apple' and definitional verbs do not appear within the first 100 words of the parsed body text.",
+    "impact": 4,
     "effort": 2,
     "suggested_action": {
-      "summary": "Update pages with 'dateModified' Schema.org tags and push updates to primary knowledge bases (Wikidata, Crunchbase) to ensure independent corroboration.",
+      "summary": "Ensure the first paragraph of the page clearly states what the brand is and what it provides. LLMs struggle to extract concise summaries when definitions are buried deep in the DOM or hidden in unstructured layouts.",
       "priority": "high"
     }
   }

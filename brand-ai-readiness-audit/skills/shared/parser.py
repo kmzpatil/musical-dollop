@@ -29,6 +29,8 @@ class IngestionParser(HTMLParser):
         
         # Advanced skill level metrics
         self.og_tags = 0
+        self.og_title = False
+        self.og_description = False
         self.max_dom_depth = 0
         self.has_canonical = False
         self.h1_count = 0
@@ -68,6 +70,10 @@ class IngestionParser(HTMLParser):
                 self.has_viewport = True
             elif prop.startswith("og:") or name.startswith("twitter:"):
                 self.og_tags += 1
+                if prop == "og:title":
+                    self.og_title = True
+                elif prop == "og:description":
+                    self.og_description = True
         elif tag == "link" and attrs_dict.get("rel") == "canonical":
             self.has_canonical = True
         elif tag == "nav":
@@ -161,6 +167,35 @@ class IngestionParser(HTMLParser):
             
         if text and "script" not in self.tag_stack and "style" not in self.tag_stack:
             self.body_text_length += len(text)
+
+    def to_markdown(self):
+        md = []
+        md.append(f"# {self.title}\n")
+        if self.meta_description:
+            md.append(f"> {self.meta_description}\n")
+        
+        for el in self.elements:
+            text = el["text"].strip()
+            if not text:
+                continue
+                
+            tag = el["type"]
+            if tag == "h1":
+                md.append(f"# {text}")
+            elif tag == "h2":
+                md.append(f"## {text}")
+            elif tag == "h3":
+                md.append(f"### {text}")
+            elif tag == "h4":
+                md.append(f"#### {text}")
+            elif tag in ["h5", "h6"]:
+                md.append(f"##### {text}")
+            elif tag == "li":
+                md.append(f"- {text}")
+            elif tag in ["p", "div", "span"]:
+                md.append(f"{text}")
+                
+        return "\n\n".join(md)
 
 def parse_html(html_content):
     parser = IngestionParser()

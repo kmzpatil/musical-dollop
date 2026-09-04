@@ -33,12 +33,23 @@ def run_audit(url, output_file=None, debug=False):
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=15) as response:
             html = response.read().decode('utf-8', errors='ignore')
-        with open(source_file, "w") as f:
+        with open(source_file, "w", encoding='utf-8') as f:
             f.write(html)
+            
+        # Generate LLM Markdown View
+        import sys
+        sys.path.append(base_dir)
+        from skills.shared.parser import parse_html
+        result = parse_html(html)
+        md_file = os.path.join(report_dir, "llm_view.md")
+        with open(md_file, "w", encoding="utf-8") as f:
+            f.write(result["parser"].to_markdown())
+            
     except Exception as e:
         print(f"[!] Failed to fetch {url}: {e}")
-        with open(source_file, "w") as f:
+        with open(source_file, "w", encoding='utf-8') as f:
             f.write("")
+        md_file = ""
             
     def run_skill(name, script_path, args, out_path):
         if debug:
@@ -70,6 +81,33 @@ def run_audit(url, output_file=None, debug=False):
             print(f"[!] Orchestrator failed with exit code {res.returncode}.")
             
     print(f"[*] Audit complete! Final report saved to: {final_file}")
+    
+    # Print beautiful summary
+    if os.path.exists(final_file) and not debug:
+        import json
+        with open(final_file, 'r', encoding='utf-8') as f:
+            final_data = json.load(f)
+            
+        print("\n" + "="*50)
+        print(f" AUDIT COMPLETE: {final_data.get('site', url)}")
+        print("="*50)
+        
+        summary = final_data.get("summary", {})
+        print(f" Total Findings: {summary.get('total_findings', 0)}")
+        print(f" [ Critical: {summary.get('critical', 0)} | High: {summary.get('high', 0)} | Medium: {summary.get('medium', 0)} | Low: {summary.get('low', 0)} ]\n")
+        
+        for finding in final_data.get("findings", []):
+            sev = finding.get("severity", "").upper()
+            title = finding.get("title", "")
+            print(f" - [{sev}] {title}")
+            
+        print("\n" + "="*50)
+        print(f" Full JSON report saved to: {final_file}")
+        try:
+            if md_file:
+                print(f" LLM Markdown View saved to: {md_file}")
+        except:
+            pass
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Brand AI-Readiness Audit")
