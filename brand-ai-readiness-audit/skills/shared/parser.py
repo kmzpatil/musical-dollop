@@ -136,7 +136,7 @@ class IngestionParser(HTMLParser):
         if self.in_json_ld:
             self.json_ld_content += data
             
-        if text and self.elements:
+        if text and self.elements and "script" not in self.tag_stack and "style" not in self.tag_stack:
             # Append text to the last opened structural element
             self.elements[-1]["text"] += text + " "
             
@@ -163,8 +163,10 @@ class IngestionParser(HTMLParser):
                 md.append(f"### {text}")
             elif tag == "h4":
                 md.append(f"#### {text}")
-            elif tag in ["h5", "h6"]:
+            elif tag == "h5":
                 md.append(f"##### {text}")
+            elif tag == "h6":
+                md.append(f"###### {text}")
             elif tag == "li":
                 md.append(f"- {text}")
             elif tag in ["p", "div", "span"]:

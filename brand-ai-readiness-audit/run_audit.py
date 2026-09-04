@@ -43,15 +43,27 @@ def run_audit(url):
         )
     
     print("  -> Running engagement-audit...")
-    subprocess.run(f'python skills/engagement-audit/scripts/audit_engagement.py "{url}" > "{eng_file}"', shell=True, cwd=base_dir)
+    with open(eng_file, "w", encoding="utf-8") as out:
+        subprocess.run(
+            [sys.executable, "skills/engagement-audit/scripts/audit_engagement.py", url],
+            check=True,
+            cwd=base_dir,
+            stdout=out,
+        )
     
     # Run orchestrator
     print("  -> Running audit-orchestrator...")
     ai_ans_file = os.path.join(report_dir, "ai_answerability.json")
-    orchestrator_args = f'"{url}" "{disc_file}" "{eng_file}"'
+    orchestrator_args = [sys.executable, "skills/audit-orchestrator/scripts/orchestrate.py", url, disc_file, eng_file]
     if os.path.exists(ai_ans_file):
-        orchestrator_args += f' "{ai_ans_file}"'
-    subprocess.run(f'python skills/audit-orchestrator/scripts/orchestrate.py {orchestrator_args} > "{final_file}"', shell=True, cwd=base_dir)
+        orchestrator_args.append(ai_ans_file)
+    with open(final_file, "w", encoding="utf-8") as out:
+        subprocess.run(
+            orchestrator_args,
+            check=True,
+            cwd=base_dir,
+            stdout=out,
+        )
     
     # Print beautiful summary
     if os.path.exists(final_file):
