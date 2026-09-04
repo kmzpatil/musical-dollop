@@ -34,7 +34,13 @@ def run_audit(url):
             f.write(result["parser"].to_markdown())
             
     print("  -> Running discoverability-audit...")
-    subprocess.run(f'python skills/discoverability-audit/scripts/audit_discoverability.py "{url}" > "{disc_file}"', shell=True, cwd=base_dir)
+    with open(disc_file, "w", encoding="utf-8") as out:
+        subprocess.run(
+            [sys.executable, "skills/discoverability-audit/scripts/audit_discoverability.py", url],
+            check=True,
+            cwd=base_dir,
+            stdout=out,
+        )
     
     print("  -> Running engagement-audit...")
     subprocess.run(f'python skills/engagement-audit/scripts/audit_engagement.py "{url}" > "{eng_file}"', shell=True, cwd=base_dir)
