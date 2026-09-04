@@ -1,6 +1,6 @@
 {
   "site": "apple.com",
-  "audited_at": "2026-09-02T21:39:15Z",
+  "audited_at": "2026-09-04T20:10:41Z",
   "summary": {
     "total_findings": 4,
     "critical": 1,
@@ -18,7 +18,8 @@
       "effort": 1,
       "suggested_action": {
         "summary": "Adopt the llms.txt standard by hosting an llms.txt file to provide structured context explicitly for AI crawlers. Machines extract facts more reliably from explicit, concise markdown than from complex HTML layouts.",
-        "priority": "high"
+        "priority": "high",
+        "snippet": "# Brand Context\nThis site is the official home for [Brand Name].\n\n## Key Facts\n- Fact 1\n- Fact 2"
       },
       "priority_score": 4.3
     },

@@ -75,7 +75,8 @@ def audit(url):
             "effort": 1,
             "suggested_action": {
                 "summary": "Adopt the llms.txt standard by hosting an llms.txt file to provide structured context explicitly for AI crawlers. Machines extract facts more reliably from explicit, concise markdown than from complex HTML layouts.",
-                "priority": "high"
+                "priority": "high",
+                "snippet": "# Brand Context\nThis site is the official home for [Brand Name].\n\n## Key Facts\n- Fact 1\n- Fact 2"
             }
         })
 
@@ -195,6 +196,22 @@ def audit(url):
             }
         })
         
+    # 5.5 Open Graph Tags
+    if not parser.og_title or not parser.og_description:
+        findings.append({
+            "id": "D-013",
+            "title": "Missing Open Graph Meta Tags",
+            "severity": "high",
+            "evidence": "Missing og:title or og:description meta tags. AI search engine citation cards will render poorly.",
+            "impact": 4,
+            "effort": 1,
+            "suggested_action": {
+                "summary": "Add Open Graph title and description tags to ensure rich preview cards render correctly in AI interfaces like ChatGPT and Perplexity.",
+                "priority": "high",
+                "snippet": '<meta property="og:title" content="Your Page Title" />\n<meta property="og:description" content="A clear, concise description of your page for AI summaries." />'
+            }
+        })
+
     # 6. Canonical Tags
     if not parser.has_canonical:
         findings.append({
@@ -206,7 +223,8 @@ def audit(url):
             "effort": 1,
             "suggested_action": {
                 "summary": "Add a canonical tag to prevent AI indexes from splitting your domain's entity authority across duplicate URLs. Explicit signals guide the model's weight attribution to the correct primary source.",
-                "priority": "medium"
+                "priority": "medium",
+                "snippet": f'<link rel="canonical" href="{url}" />'
             }
         })
 

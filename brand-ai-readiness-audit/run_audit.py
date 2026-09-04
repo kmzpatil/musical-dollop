@@ -3,6 +3,10 @@ import os
 import subprocess
 from urllib.parse import urlparse
 
+# Import parser for markdown generation
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+from skills.shared.parser import parse_url
+
 def run_audit(url):
     parsed = urlparse(url)
     domain = parsed.netloc if parsed.netloc else url
@@ -21,6 +25,14 @@ def run_audit(url):
     final_file = os.path.join(report_dir, "final_report.json")
     
     # Run skills
+    print("  -> Generating LLM Markdown View...")
+    result = parse_url(url)
+    md_file = ""
+    if result["success"]:
+        md_file = os.path.join(report_dir, "llm_view.md")
+        with open(md_file, "w", encoding="utf-8") as f:
+            f.write(result["parser"].to_markdown())
+            
     print("  -> Running discoverability-audit...")
     subprocess.run(f'python skills/discoverability-audit/scripts/audit_discoverability.py "{url}" > "{disc_file}"', shell=True, cwd=base_dir)
     
@@ -35,7 +47,29 @@ def run_audit(url):
         orchestrator_args += f' "{ai_ans_file}"'
     subprocess.run(f'python skills/audit-orchestrator/scripts/orchestrate.py {orchestrator_args} > "{final_file}"', shell=True, cwd=base_dir)
     
-    print(f"[*] Audit complete! Final report saved to: {final_file}")
+    # Print beautiful summary
+    if os.path.exists(final_file):
+        import json
+        with open(final_file, 'r', encoding='utf-8') as f:
+            final_data = json.load(f)
+            
+        print("\n" + "="*50)
+        print(f" AUDIT COMPLETE: {final_data['site']}")
+        print("="*50)
+        
+        summary = final_data.get("summary", {})
+        print(f" Total Findings: {summary.get('total_findings', 0)}")
+        print(f" [ Critical: {summary.get('critical', 0)} | High: {summary.get('high', 0)} | Medium: {summary.get('medium', 0)} | Low: {summary.get('low', 0)} ]\n")
+        
+        for finding in final_data.get("findings", []):
+            sev = finding.get("severity", "").upper()
+            title = finding.get("title", "")
+            print(f" - [{sev}] {title}")
+            
+        print("\n" + "="*50)
+        print(f" Full JSON report saved to: {final_file}")
+        if md_file:
+            print(f" LLM Markdown View saved to: {md_file}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

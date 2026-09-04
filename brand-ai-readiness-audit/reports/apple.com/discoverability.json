@@ -8,7 +8,8 @@
     "effort": 1,
     "suggested_action": {
       "summary": "Adopt the llms.txt standard by hosting an llms.txt file to provide structured context explicitly for AI crawlers. Machines extract facts more reliably from explicit, concise markdown than from complex HTML layouts.",
-      "priority": "high"
+      "priority": "high",
+      "snippet": "# Brand Context\nThis site is the official home for [Brand Name].\n\n## Key Facts\n- Fact 1\n- Fact 2"
     }
   },
   {

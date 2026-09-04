@@ -1,0 +1,26 @@
+{
+  "site": "vercel.com",
+  "audited_at": "2026-09-04T20:06:40Z",
+  "summary": {
+    "total_findings": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 0
+  },
+  "findings": [
+    {
+      "id": "D-005",
+      "title": "Images Missing Alt Text",
+      "severity": "medium",
+      "evidence": "Found 1 images without alt text. LLMs are blind to these images.",
+      "impact": 3,
+      "effort": 2,
+      "suggested_action": {
+        "summary": "Ensure all critical images have descriptive alt text for accessibility and AI parsing. Vision models use surrounding text and alt tags to contextualize non-textual content.",
+        "priority": "medium"
+      },
+      "priority_score": 3.3
+    }
+  ]
+}
