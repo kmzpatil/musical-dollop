@@ -18,3 +18,5 @@ test_robots.py
 
 # Archive files
 *.zip
+
+.agents/
