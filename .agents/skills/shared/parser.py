@@ -38,7 +38,7 @@ class IngestionParser(HTMLParser):
         self.images_without_alt = 0
         
         # JS Proxy Check
-        self.visible_word_count = 0
+        self.body_text_length = 0
         self.has_root_div = False
         self.has_noscript = False
         
@@ -86,9 +86,7 @@ class IngestionParser(HTMLParser):
             alt = attrs_dict.get("alt", None)
             if alt is None or alt.strip() == "":
                 self.images_without_alt += 1
-        elif tag == "div" and attrs_dict.get("id") in ["root", "app", "__next"]:
-            self.has_root_div = True
-        elif tag == "script" and ("_next/static" in attrs_dict.get("src", "") or "react" in attrs_dict.get("src", "")):
+        elif tag == "div" and attrs_dict.get("id") in ["root", "app"]:
             self.has_root_div = True
         elif tag == "noscript":
             self.has_noscript = True
@@ -96,10 +94,9 @@ class IngestionParser(HTMLParser):
         classes = attrs_dict.get("class", "").lower()
         id_attr = attrs_dict.get("id", "").lower()
         role = attrs_dict.get("role", "").lower()
-        aria_modal = attrs_dict.get("aria-modal", "").lower()
         overlay_keywords = ["modal", "popup", "overlay", "cookie-banner", "interstitial"]
         
-        if role == "dialog" or aria_modal == "true":
+        if role == "dialog":
             self.has_overlay = True
         else:
             for kw in overlay_keywords:
@@ -162,50 +159,35 @@ class IngestionParser(HTMLParser):
             # Append text to the last opened structural element
             self.elements[-1]["text"] += text + " "
             
-            
-        if text and "script" not in self.tag_stack and "style" not in self.tag_stack and "noscript" not in self.tag_stack:
-            self.visible_word_count += len(text.split())
+        if text and "script" not in self.tag_stack and "style" not in self.tag_stack:
+            self.body_text_length += len(text)
 
 def parse_html(html_content):
     parser = IngestionParser()
     parser.feed(html_content)
-    return {"success": True, "html_length": len(html_content), "parser": parser, "html": html_content}
+    return {"success": True, "html_length": len(html_content), "parser": parser}
 
 def parse_url(url, retries=3):
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
         'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate'
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none'
     }
-    
-    import ssl
-    import urllib.error
-    
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
     
     last_error = None
     
     for attempt in range(retries):
         try:
             req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, context=ctx, timeout=15) as response:
+            with urllib.request.urlopen(req, timeout=15) as response:
                 html = response.read().decode('utf-8', errors='ignore')
                 
             parser = IngestionParser()
             parser.feed(html)
-            return {"success": True, "html_length": len(html), "parser": parser, "html": html}
-        except urllib.error.HTTPError as e:
-            try:
-                html = e.read().decode('utf-8', errors='ignore')
-            except Exception:
-                html = str(e)
-            parser = IngestionParser()
-            parser.feed(html)
-            return {"success": True, "html_length": len(html), "parser": parser, "html": html}
+            return {"success": True, "html_length": len(html), "parser": parser}
         except Exception as e:
             last_error = str(e)
             time.sleep(2 ** attempt) # Exponential backoff

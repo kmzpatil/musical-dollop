@@ -44,9 +44,9 @@ def generate_report(url, files):
         if sev in severity_counts:
             severity_counts[sev] += 1
 
-        allowed_finding_keys = {"id", "title", "severity", "evidence", "suggested_action", "metadata"}
-        metadata = finding.get("metadata", {})
-        keys_to_move = [k for k in list(finding.keys()) if k not in allowed_finding_keys]
+        allowed_finding_keys = {"id", "title", "severity", "evidence", "suggested_action"}
+        metadata = {}
+        keys_to_move = [k for k in finding.keys() if k not in allowed_finding_keys]
         for k in keys_to_move:
             metadata[k] = finding.pop(k)
         if metadata:
@@ -73,10 +73,9 @@ def generate_report(url, files):
         "audited_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "summary": {
             "total_findings": len(all_findings),
-            "critical": severity_counts.get("critical", 0),
-            "high": severity_counts.get("high", 0),
-            "medium": severity_counts.get("medium", 0),
-            "low": severity_counts.get("low", 0)
+            "critical": severity_counts["critical"],
+            "high": severity_counts["high"],
+            "medium": severity_counts["medium"]
         },
         "findings": all_findings
     }

@@ -11,29 +11,13 @@ def audit(url, source_file=None):
     findings = []
     
     if source_file and os.path.exists(source_file):
-        with open(source_file, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(source_file, 'r') as f:
             html = f.read()
-        if not html.strip():
-            result = {"success": False, "error": "Empty source file (fetch failed)"}
-        else:
-            result = parse_html(html)
-            result['html'] = html
+        result = parse_html(html)
     else:
         result = parse_url(url)
         
     if not result["success"]:
-        return findings
-
-    # WAF DETECTION
-    waf_signatures = ["cf-browser-verification", "challenge-platform", "Attention Required! | Cloudflare", "Access Denied"]
-    raw_html = result.get("html", "")
-    is_waf = False
-    for sig in waf_signatures:
-        if sig in raw_html:
-            is_waf = True
-            break
-            
-    if is_waf:
         return findings
 
     parser = result["parser"]
@@ -57,18 +41,10 @@ def audit(url, source_file=None):
     parsed_base = urlparse(url)
     base_domain = parsed_base.netloc
     
-    def get_root_domain(domain):
-        if domain.startswith("www."):
-            return domain[4:]
-        return domain
-
-    base_root = get_root_domain(base_domain)
-    
     internal_links = 0
     for link in parser.links:
         parsed_link = urlparse(link)
-        netloc = parsed_link.netloc
-        if not netloc or netloc == base_root or netloc.endswith("." + base_root):
+        if not parsed_link.netloc or parsed_link.netloc == base_domain:
             internal_links += 1
 
     if internal_links < 3 and parser.buttons == 0:
@@ -151,7 +127,7 @@ def audit(url, source_file=None):
             "id": "E-007",
             "title": "Intrusive Overlay Detected",
             "severity": "high",
-            "evidence": "Semantic overlays (aria-modal) or intrusive popup classes were detected, which may trap AI crawlers incapable of interacting with the DOM.",
+            "evidence": "Detected modal, popup, cookie-banner, or blocking interstitial in the DOM.",
             "impact": 5,
             "effort": 2,
             "suggested_action": {

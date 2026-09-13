@@ -1,27 +1,8 @@
 import sys
 import os
 import json
-import time
 import urllib.request
-import urllib.robotparser
 from urllib.parse import urlparse
-import ssl
-
-def get_advanced_req(url):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate'
-    }
-    return urllib.request.Request(url, headers=headers)
-
-def get_ssl_ctx():
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    return ctx
 
 # Add the marketplace root to sys.path to import the shared parser
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
@@ -31,44 +12,32 @@ def check_robots(url):
     parsed = urlparse(url)
     robots_url = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
     blocked_bots = []
-    
-    last_error = None
-    content = ""
-    for attempt in range(3):
-        try:
-            req = get_advanced_req(robots_url)
-            with urllib.request.urlopen(req, context=get_ssl_ctx(), timeout=5) as response:
-                content = response.read().decode('utf-8')
-                break
-        except Exception as e:
-            last_error = e
-            time.sleep(2 ** attempt)
-    else:
-        return False, f"Robots.txt fetch failed (Timeout or HTTP Error): {str(last_error)}"
-
-    rp = urllib.robotparser.RobotFileParser()
-    rp.set_url(robots_url)
-    rp.parse(content.splitlines())
-
-    agents_to_check = ['GPTBot', 'ClaudeBot', 'PerplexityBot']
-    
-    if not rp.can_fetch('*', "/"):
-        blocked_bots.append('*')
-        
-    for agent in agents_to_check:
-        if not rp.can_fetch(agent, "/"):
-            blocked_bots.append(agent)
-            
-    if blocked_bots:
-        return False, f"Robots.txt is explicitly blocking AI crawlers: {', '.join(set(blocked_bots))}."
-    return True, "Robots.txt is present and does not block known AI crawlers."
+    try:
+        req = urllib.request.Request(robots_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            content = response.read().decode('utf-8')
+            lines = content.split('\n')
+            current_agent = ""
+            for line in lines:
+                line = line.strip().lower()
+                if line.startswith('user-agent:'):
+                    current_agent = line.split(':')[1].strip()
+                elif line.startswith('disallow:') and '/' in line:
+                    if current_agent in ['gptbot', 'claudebot', 'perplexitybot', 'oai-searchbot', 'ccbot', 'google-extended'] or (current_agent == '*' and line == 'disallow: /'):
+                        blocked_bots.append(current_agent)
+                        
+            if blocked_bots:
+                return False, f"Robots.txt is explicitly blocking AI crawlers: {', '.join(set(blocked_bots))}."
+            return True, "Robots.txt is present and does not block known AI crawlers."
+    except Exception as e:
+        return False, f"Robots.txt fetch failed (Timeout or HTTP Error): {str(e)}"
 
 def check_llms_txt(url):
     parsed = urlparse(url)
     llms_url = f"{parsed.scheme}://{parsed.netloc}/llms.txt"
     try:
-        req = get_advanced_req(llms_url)
-        with urllib.request.urlopen(req, context=get_ssl_ctx(), timeout=5) as response:
+        req = urllib.request.Request(llms_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
             if response.getcode() == 200:
                 return True
     except Exception:
@@ -112,13 +81,9 @@ def audit(url, source_file=None):
 
     # Fetch and parse using the unified Ingestion Engine
     if source_file and os.path.exists(source_file):
-        with open(source_file, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(source_file, 'r') as f:
             html = f.read()
-        if not html.strip():
-            result = {"success": False, "error": "Empty source file (fetch failed)"}
-        else:
-            result = parse_html(html)
-            result['html'] = html
+        result = parse_html(html)
     else:
         result = parse_url(url)
     if not result["success"]:
@@ -131,30 +96,6 @@ def audit(url, source_file=None):
             "effort": 3,
             "suggested_action": {
                 "summary": "Ensure the server is running and accessible or unblock the crawler headers.",
-                "priority": "critical"
-            }
-        })
-        return findings
-
-    # WAF DETECTION
-    waf_signatures = ["cf-browser-verification", "challenge-platform", "Attention Required! | Cloudflare", "Access Denied"]
-    raw_html = result.get("html", "")
-    is_waf = False
-    for sig in waf_signatures:
-        if sig in raw_html:
-            is_waf = True
-            break
-            
-    if is_waf:
-        findings.append({
-            "id": "D-000",
-            "title": "Aggressive WAF / Bot-Protection Intercepting AI Crawlers",
-            "severity": "critical",
-            "evidence": "HTML response contains known WAF challenge or blocking signatures.",
-            "impact": 5,
-            "effort": 2,
-            "suggested_action": {
-                "summary": "Configure firewall and edge security rules (Cloudflare/Akamai) to allow verified AI crawler IP ranges and user-agents (e.g., GPTBot, ClaudeBot, PerplexityBot) to access public informational pages.",
                 "priority": "critical"
             }
         })
@@ -245,17 +186,17 @@ def audit(url, source_file=None):
         })
 
     # 5. JS-Render Proxy Check
-    if parser.visible_word_count < 150 and (parser.has_root_div or parser.has_noscript):
+    if parser.body_text_length < 500 and (parser.has_root_div or parser.has_noscript):
         findings.append({
-            "id": "D-017",
-            "title": "Client-Side Hydration Trap (SPA Lacks Server-Side Rendering)",
-            "severity": "high",
-            "evidence": f"Low text-to-markup ratio + SPA root detected. Visible text contains only {parser.visible_word_count} words. AI crawlers that don't execute JS will see a blank page.",
+            "id": "D-010",
+            "title": "High JavaScript Dependency",
+            "severity": "critical",
+            "evidence": f"Low text-to-markup ratio + SPA root detected. Raw HTML body contains only {parser.body_text_length} characters of text. AI crawlers that don't execute JS will see a blank page.",
             "impact": 5,
-            "effort": 4,
+            "effort": 5,
             "suggested_action": {
-                "summary": "Implement Server-Side Rendering (SSR) or Static Site Generation (SSG) for public landing pages. AI crawlers do not execute JavaScript; content rendered entirely in the browser is completely invisible to generative search engines.",
-                "priority": "high"
+                "summary": "Implement Server-Side Rendering (SSR) or dynamic rendering to serve populated HTML directly to AI crawlers. Search engines heavily deprioritize pages that require full client-side JavaScript execution to reveal primary content.",
+                "priority": "critical"
             }
         })
         

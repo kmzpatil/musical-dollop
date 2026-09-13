@@ -13,22 +13,14 @@ This skill operationalizes Appendix B ("Is it easy to quote?") by performing a r
 
 ## Execution Procedure
 
-Since a live LLM API key may not be available in a sandboxed environment, this skill acts as a robust template that documents the exact procedure an agent should follow when deployed in a live marketplace.
+When executing this skill, the agent must perform the semantic evaluation based purely on the structured payload provided by the ingestion engine.
 
-1. **Information Extraction**:
-   - The agent visits the target domain (e.g., `domain.com/about`).
-   - It extracts 3-5 distinct, dated, or highly specific factual claims (e.g., "Founded in 2012", "HQ in London", "Pricing starts at $99/mo").
-2. **Ground Truth Caching**:
-   - These extracted facts become the "Ground Truth" array.
-3. **Live Search Grounding**:
-   - The agent initiates a fresh, isolated session with an LLM that has access to live web search tools (e.g., Gemini with Google Search tool enabled).
-   - It asks the LLM the 3-5 factual questions *without* providing the domain URL directly in the prompt, forcing the LLM to rely on search indexing.
-4. **Freshness & Corroboration**:
-   - The agent evaluates if the extracted facts are stale based on copyright years, "last updated" text, or versions.
-   - It cross-references the live search results to determine how many independent domains corroborate the claim.
-5. **Answer Diffing & Scoring**:
-   - The agent diffs the LLM's answers against the Ground Truth array.
-   - If the LLM hallucinates, returns outdated information, or if the claim is uncorroborated, the skill flags an `AI-Answerability Failure`.
+1. **Information Ingestion**:
+   - Read `extracted_content.json` from the domain's report directory (`reports/<domain>/extracted_content.json`).
+2. **Semantic Evaluation**:
+   - Evaluate whether the brand's primary identity, core value proposition, and offerings can be definitively summarized from this text alone without external knowledge.
+3. **Finding Generation**:
+   - If the identity and core offerings are missing, ambiguous, or buried deeply such that an LLM would struggle to confidently extract them without prior knowledge, document an `A-001` answerability finding in `ai_answerability.json` for the orchestrator to pick up.
 
 ## Output Schema Example
 

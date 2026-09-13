@@ -29,11 +29,34 @@ def run_audit(url, output_file=None, debug=False):
     if debug:
         print(f"[DEBUG] Fetching URL {url}...")
     import urllib.request
+    import urllib.error
+    import ssl
+    
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate'
+    }
+    
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+
     try:
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=15) as response:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, context=ctx, timeout=15) as response:
             html = response.read().decode('utf-8', errors='ignore')
         with open(source_file, "w") as f:
+            f.write(html)
+    except urllib.error.HTTPError as e:
+        print(f"[!] HTTP Error {e.code} fetching {url}. Saving error HTML for WAF detection.")
+        try:
+            html = e.read().decode('utf-8', errors='ignore')
+        except Exception:
+            html = str(e)
+        with open(source_file, "w", encoding='utf-8') as f:
             f.write(html)
     except Exception as e:
         print(f"[!] Failed to fetch {url}: {e}")

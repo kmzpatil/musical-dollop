@@ -1,15 +1,20 @@
+# Python caching and virtual environments
 __pycache__/
 *.pyc
-*.pyo
-.DS_Store
 venv/
 .env
 
+# Dynamically generated reports and data dumps
 reports/
-report.json
-mock_discoverability_report.json
-mock_engagement_report.json
-audit_report.md
-mock_external.html
-mock_overlay.html
+diagnostic_dumps/
+
+# Mock HTML files and scratchpads
+mock_*.html
 test_robots.py
+
+# Extraneous JSON files (exclude all except marketplace.json)
+*.json
+!marketplace.json
+
+# Archive files
+*.zip
